@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Veyra — Soft to touch. Precise typing.</title>
+<meta name="description" content="Veyra is a modern typing practice web app focused on soft learning, precise typing, and real-time progress tracking.">
+<style>
+:root{
+  --bg:#f7fbfc; --card:#ffffff; --muted:#64748b;
+  --accent1:#0ea5a4; --accent2:#f59e0b;
+  --danger:#ef4444; --success:#16a34a; --gold:#f59e0b;
+  --font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --radius:8px; --maxw:980px;
+  --zone-left-pinky: rgba(14,165,164,0.18);
+  --zone-left-ring: rgba(14,165,164,0.14);
+  --zone-left-middle: rgba(6,182,212,0.14);
+  --zone-left-index: rgba(245,158,11,0.16);
+  --zone-right-index: rgba(245,158,11,0.16);
+  --zone-right-middle: rgba(239,68,68,0.12);
+  --zone-right-ring: rgba(239,68,68,0.10);
+  --zone-right-pinky: rgba(239,68,68,0.14);
+  --zone-outline: rgba(7,20,32,0.06);
+}
+
+html,body{height:100%;margin:0;font-family:var(--font);background:linear-gradient(180deg,#f1fbfb,#f6f7fb);color:#07203a}
+body{overflow:auto}
+.wrap{position: relative;max-width:980px;width:100%;var(--maxw);min-height:100vh;margin-left:auto;margin-right:auto;padding:12px;display:grid;grid-template-columns:1.6fr 0.9fr;gap:12px}
+
+header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;box-shadow:0 8px 16px rgba(14,165,164,0.08)}
+.logo-deco{font-size:11px;margin-left:2px;color:rgba(255,255,255,0.95)}
+.title{font-size:18px;margin:0}
+.subtitle{font-size:12px;color:var(--muted);margin:0}
+.pill{padding:6px 10px;border-radius:999px;background:rgba(15,23,42,0.04);font-size:12px;color:var(--muted)}
+
+/* cards & buttons */
+.card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(9,30,63,0.05);border:1px solid rgba(9,30,63,0.03)}
+.btn{padding:8px 10px;border-radius:10px;border:1px solid rgba(9,30,63,0.06);background:linear-gradient(180deg,rgba(255,255,255,0.95),#fff);cursor:pointer;font-weight:700;font-size:13px}
+.btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#fff;border:0}
+.btn.ghost{background:transparent;border:1px dashed rgba(9,30,63,0.06)}
+.select{padding:6px 8px;border-radius:8px;border:1px solid rgba(9,30,63,0.06);background:transparent;font-size:13px}
+.small{font-size:12px;color:var(--muted)}
+
+/* HERO + stats */
+.hero{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.wpm-card{padding:12px;border-radius:12px;min-width:160px;box-shadow:0 8px 20px rgba(14,165,164,0.03)}
+.wpm-big{font-size:36px;font-weight:800;color:#07203a;line-height:1}
+.metrics{display:flex;gap:12px;align-items:center;margin-top:8px}
+.meter{height:8px;background:#e6eef0;border-radius:999px;overflow:hidden;width:110px}
+.meter>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:0%;transition:width .35s}
+
+/* HILL-CLIMB (main linear track) */
+#avatarTrackMain{height:56px;border-radius:12px;background:linear-gradient(180deg,#fff,#f9fffb);border:1px solid rgba(9,30,63,0.04);display:flex;align-items:center;padding:8px;overflow:visible}
+.track-rail{position:relative;height:10px;background:linear-gradient(90deg,#e6f7f6,#fff2e6);border-radius:999px;width:100%;margin:0 8px}
+.runner{position:absolute;top:50%;transform:translate(-50%,-50%) scale(1);width:40px;height:40px;border-radius:999px;background:transparent;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(14,165,164,0.12);transition:left .16s,transform .12s,box-shadow .12s}
+
+/* practice area */
+#targetArea{min-height:56px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#fff,#fcfffb);border:1px solid rgba(9,30,63,0.03);font-size:15px;line-height:1.6;overflow:auto}
+.char.correct{color:var(--success);background:rgba(22,163,74,0.07);padding:2px 6px;border-radius:6px}
+.char.current{color:var(--gold);font-weight:700;text-decoration:underline}
+.char.wrong{color:var(--danger);background:rgba(239,68,68,0.06);padding:2px 6px;border-radius:6px}
+
+/* keyboard compact */
+#keyboard{margin-top:10px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.row{display:flex;gap:6px;justify-content:center} 
+.key{min-width:34px;height:36px;border-radius:10px;background:#f3f6f6;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07203a;border:1px solid rgba(9,30,63,0.03);transition:transform .06s,box-shadow .08s,font-size .06s;padding:4px}
+.key.small{min-width:26px;font-size:12px}
+/* --- Stronger keyboard visibility --- */
+.key{background: #ffffff;border: 2px solid rgba(7,20,32,0.18); box-shadow:0 3px 6px rgba(7,20,32,0.10),inset 0 -2px 0 rgba(7,20,32,0.06);color: #07203a;font-weight: 700;}
+
+.key.space{min-width:220px}
+.key.next{outline:3px solid rgba(245,158,11,0.14);box-shadow:0 6px 16px rgba(245,158,11,0.05)}
+.key.next{outline: 3px solid #f59e0b;background: rgba(245,158,11,0.30) !important;box-shadow:0 6px 14px rgba(245,158,11,0.45);transform: translateY(-1px);}
+
+.key.correct{background:rgba(34,197,94,0.12)}
+.key.wrong{background:rgba(239,68,68,0.08);animation:shake 220ms}
+.key.pressed{transform:translateY(2px);box-shadow:none}
+@keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}100%{transform:translateX(0)}}
+
+/* finger-zone colors (STRONGER) */
+.key.zone-left-pinky{background:linear-gradient(180deg,var(--zone-left-pinky),transparent);border:1px solid var(--zone-outline)}
+.key.zone-left-ring{background:linear-gradient(180deg,var(--zone-left-ring),transparent);border:1px solid var(--zone-outline)}
+.key.zone-left-middle{background:linear-gradient(180deg,var(--zone-left-middle),transparent);border:1px solid var(--zone-outline)}
+.key.zone-left-index{background:linear-gradient(180deg,var(--zone-left-index),transparent);border:1px solid var(--zone-outline)}
+.key.zone-right-index{background:linear-gradient(180deg,var(--zone-right-index),transparent);border:1px solid var(--zone-outline)}
+.key.zone-right-middle{background:linear-gradient(180deg,var(--zone-right-middle),transparent);border:1px solid var(--zone-outline)}
+.key.zone-right-ring{background:linear-gradient(180deg,var(--zone-right-ring),transparent);border:1px solid var(--zone-outline)}
+.key.zone-right-pinky{background:linear-gradient(180deg,var(--zone-right-pinky),transparent);border:1px solid var(--zone-outline)}
+
+.key.zone-left-pinky{background: linear-gradient(180deg, rgba(14,165,164,0.45), #ffffff);}
+.key.zone-left-ring{background: linear-gradient(180deg, rgba(14,165,164,0.38), #ffffff);}
+.key.zone-left-middle{background: linear-gradient(180deg, rgba(6,182,212,0.40), #ffffff);}
+.key.zone-left-index{background: linear-gradient(180deg, rgba(245,158,11,0.45), #ffffff);}
+
+.key.zone-right-index{background: linear-gradient(180deg, rgba(245,158,11,0.45), #ffffff);}
+.key.zone-right-middle{background: linear-gradient(180deg, rgba(239,68,68,0.38), #ffffff);}
+.key.zone-right-ring{background: linear-gradient(180deg, rgba(239,68,68,0.32), #ffffff);}
+.key.zone-right-pinky{background: linear-gradient(180deg, rgba(239,68,68,0.45), #ffffff);}
+
+/* right sidebar */
+aside{display:flex;flex-direction:column;max-height;min-height:0}
+#history{flex:1;overflow-y:scroll;margin-top:6px;padding-right:6px}
+
+/* progress graph canvas */
+#progressGraph{width:100%;height:140px;border-radius:8px;background:linear-gradient(180deg,#ffffff,#f7fbfc);border:1px solid rgba(9,30,63,0.03);display:block}
+
+/* textareas & footer */
+textarea{font-size:13px;border-radius:8px}
+footer{margin-top:8px;color:var(--muted);font-size:12px;text-align:center}
+
+/* dark mode */
+body.dark{
+  background:linear-gradient(180deg,#061426,#031426);
+  color:#dbeafe;
+}
+body.dark .card{background:linear-gradient(180deg,#072033,#052032);border-color:rgba(255,255,255,0.04);box-shadow:0 6px 14px rgba(0,0,0,0.6)}
+body.dark #targetArea{background:linear-gradient(180deg,#041b2a,#072034);border-color:rgba(255,255,255,0.03);color:#dbeafe}
+body.dark .key{background:rgba(255,255,255,0.02);color:#dbeafe;border-color:rgba(255,255,255,0.03)}
+body.dark .track-rail{background:linear-gradient(90deg,#052b30,#44311a)}
+
+/* responsive */
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;padding:8px}
+  .wpm-big{font-size:30px}
+  .key.space{min-width:140px}
+}
+/* Center top clock */
+#clockCenter{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* Bigger, bold clock */
+#liveDateTime{
+  font-size:18px;       
+  font-weight:700;
+  letter-spacing:0.6px;
+}
+
+/* Floating left learning references */
+.main{
+  position:relative;
+}
+
+#leftRefs{
+  position:absolute;
+  left:-240px;     
+  top:120px;       
+  width:220px;
+}
+
+/* Mobile safety */
+@media(max-width:1100px){
+  #leftRefs{
+    position:static;
+    width:auto;
+    margin-top:16px;
+  }
+}
+.side-card{
+  width:260px;          
+  font-size:13px;
+}
+
+.side-card ul{
+  margin:0;
+  padding-left:16px;
+}
+
+.side-card li{
+  line-height:1.4;
+}
+@media (max-width: 1024px) {
+  @media (max-width: 1024px) {
+  #keyboard {
+    display: none;
+  }
+
+  #keyboard.show {
+    display: flex;
+  }
+
+  #toggleKeyboardBtn {
+    display: block !important;
+    margin: 10px 0;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <main>
+<main class="main">
+  
+    <section id="leftRefs" class="card small">
+  <strong>Learning References</strong>
+    <ul style="margin-top:8px;padding-left:16px">
+      <li>
+        Measuring and assessing typing skills in writing research<br>
+        <a href="https://www.researchgate.net/publication/349826105_Measuring_and_Assessing_Typing_Skills_in_Writing_Research"
+           target="_blank">ResearchGate</a>
+      </li>
+
+      <li style="margin-top:6px">
+        Effect of touch-typing practice on speed and accuracy<br>
+        <a href="https://pubmed.ncbi.nlm.nih.gov/26447834/"
+           target="_blank">PubMed</a>
+      </li>
+
+      <li style="margin-top:6px">
+        Touch typing fundamentals (video guide)<br>
+        <a href="https://www.youtube.com/watch?v=gfFHkqJZ7so"
+           target="_blank">YouTube tutorial</a>
+      </li>
+    </ul>
+  </section>
+
+  <!-- existing practice content continues -->
+</main>
+
+
+    <header>
+      <div class="logo" aria-hidden="true">V</div>
+
+      <div>
+        <h1 class="title">Veyra</h1>
+	<div class="subtitle">Soft to touch. Precise typing.</div>
+
+
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+         <div id="liveDateTime" class="pill">-- --- ---- • --:--:--</div>
+
+	
+        <button id="themeBtn" class="btn" title="Toggle theme" aria-pressed="false">🌙</button>
+      </div>
+<header class="top">
+  <div class="brand">
+    <!-- logo + name -->
+  </div>
+
+    <div id="clockCenter">
+   <div id="liveDateTimeCenter"></div>
+  </div>
+
+  <div class="actions">
+    <!-- theme / other buttons -->
+  </div>
+</header>
+     </header>
+     <!-- HERO -->
+    <section class="card"
+ style="padding:12px" aria-label="Main typing area">
+      <div class="hero" style="margin-bottom:8px;">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="wpm-card" role="region" aria-label="Performance metrics">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div>
+                <div class="wpm-big" id="wpmBig" aria-live="polite">0</div>
+                <div style="display:flex;gap:12px;align-items:center;margin-top:6px">
+                  <div class="small"><strong id="accBig">0%</strong> Accuracy</div>
+                  <div class="small">Time <strong id="timer">00:00</strong></div>
+                </div>
+              </div>
+            </div>
+            <div class="metrics" style="margin-top:8px">
+              <div style="display:flex;flex-direction:column">
+                <div class="small">WPM</div><div><strong id="wpm">0</strong></div>
+                <div class="meter" style="margin-top:6px"><i id="wpmBar" style="width:0%"></i></div>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <div class="small">Accuracy</div><div><strong id="acc">0%</strong></div>
+                <div class="meter" style="margin-top:6px"><i id="accBar" style="width:0%"></i></div>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <div class="small">Lesson</div><div id="lessonText">1 / 10</div>
+                <div id="lessonWrap" class="meter" style="margin-top:6px"><i id="lessonBar" style="width:0%"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="min-width:260px">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+              <label class="small" for="mode">Mode</label>
+              <select id="mode" class="select" aria-label="Practice mode">
+                <option value="words">Words</option>
+                <option value="sentences">Sentences</option>
+                <option value="numbers">Numbers</option>
+                <option value="symbols">Punctuation</option>
+                <option value="real">Real paragraph</option>
+                <option value="custom">Custom</option>
+              </select>
+
+              <label class="small" for="difficulty">Level</label>
+              <select id="difficulty" class="select" aria-label="Difficulty level">
+                <option value="easy">Beginner</option>
+                <option value="med" selected>Intermediate</option>
+                <option value="hard">Advanced</option>
+              </select>
+
+              <select id="runnerStyle" class="select" title="Choose runner style" aria-label="Runner style">
+                <option value="human" selected>Human</option>
+                <option value="snake">Snake</option>
+                <option value="ball">Ball</option>
+              </select>
+            </div>
+
+            <!-- Start / Pause / Strict + Auto-advance -->
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="start" class="btn primary" aria-pressed="false">Start</button>
+              <button id="pause" class="btn" aria-pressed="false" disabled>Pause</button>
+
+              <label style="display:flex;align-items:center;gap:6px" class="small">
+                <input type="checkbox" id="strict"> Strict
+              </label>
+              <label style="display:flex;align-items:center;gap:6px" class="small" title="Automatically load next lesson after finishing">
+                <input type="checkbox" id="autoAdvance" checked> Auto-advance
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- right small area kept for quick hints -->
+        <div style="min-width:160px;display:flex;flex-direction:column;gap:8px">
+          <div class="small" id="last60Line" aria-live="polite">Last 60s: — WPM • —% Accuracy</div>
+          <div class="small" id="coachLine" style="color:var(--muted)">Tip: Keep accuracy &gt; 90%.</div>
+        </div>
+      </div>
+
+      <!-- MAIN hill-climb track (linear rail) -->
+      <div id="avatarTrackMain" class="card" style="padding:8px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;width:100%">
+          <div style="font-weight:700;font-size:13px">Hill Climb</div>
+          <div class="track-rail" id="trackRail" style="flex:1;position:relative">
+            <div id="runnerMain" class="runner" style="left:8px" data-scale="1" aria-hidden="false">
+              <!-- default human SVG (inited by JS) -->
+            </div>
+          </div>
+          <div class="small" id="dailyGoal" aria-live="polite">00:00 / 10:00</div>
+        </div>
+      </div>
+
+      <!-- PRACTICE TARGET -->
+      <div id="targetArea" tabindex="0" aria-live="polite" aria-label="Target text — type here"></div>
+<button id="toggleKeyboardBtn" class="btn ghost small">
+  ⌨ Show Keyboard
+</button>
+
+      <!-- controls + custom text inline -->
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-top:8px">
+        <div class="small" style="margin-top:6px">Mode = custom?</div>
+        <textarea id="customText" placeholder="Custom text (paste here)" style="width:100%;min-height:70px;border-radius:8px;padding:8px;border:1px solid rgba(9,30,63,0.03);font-size:13px"></textarea>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button id="exportCSV" class="btn" disabled>CSV</button>
+          <button id="downloadCert" class="btn" disabled>Cert</button>
+        </div>
+      </div>
+
+
+      <!-- keyboard -->
+      <div id="keyboard" aria-hidden="false" style="margin-top:12px"></div>
+    </section> 
+
+</main>
+
+  <!-- RIGHT SIDE: history, graph & tips -->
+  <aside>
+    <section class="card" role="region" aria-label="Progress and history">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong>Your Progress</strong>
+        <div class="small">Local</div>
+      </div>
+
+      <!-- progress graph -->
+      <canvas id="progressGraph" aria-hidden="false" role="img" title="Progress graph"></canvas>
+
+      <!-- compact history -->
+      <div id="history" class="small" style="margin-top:8px;color:var(--muted)">No sessions yet</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="clearHistory" class="btn">Clear</button>
+        <button id="openTutor" class="btn">Tutor</button>
+        <button id="showMoreBtn" class="btn" style="display:none">Show more</button>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <strong>Session Summary</strong>
+      <div class="small" id="summaryLine" style="margin-top:8px;color:var(--muted)">Best: — • Avg: —</div>
+    </section>
+
+
+  
+    <footer class="card small" style="margin-top:12px">
+      Veyra — Soft to touch. Precise typing.
+
+      <div style="margin-top:8px"><a href="#" id="privacyLink">Privacy note</a></div>
+<div style="margin-top:6px">©2025 Bhagyashri - Veyra</div>
+
+    </footer>
+  </aside>
+</div>
+
+<!-- hidden canvas for certificate -->
+<canvas id="certCanvas" width="1200" height="700" style="display:none"></canvas>
+
+<script>
+/* ---------- CONFIG & DATA ---------- */
+const STORAGE_KEY = "Veyra_history";
+const CERT_PREFIX = "Veyra_certificate_";
+const DAILY_GOAL_SEC = 600;
+const HISTORY_SHOWN = 1;
+const GRAPH_MAX_POINTS = 20;
+
+const wordPools = {
+  easy: ["home","sand","time","lamp","book","game","milk","hand","door","code"],
+  med: ["typing","random","studio","practice","coffee","faster","lesson","finger","layout","window"],
+  hard: ["synchronise","punctuation","efficiency","performance","consistency","architecture"]
+};
+const realParagraphs = [
+  "Typing is a practical skill. Practice regularly and your accuracy will improve.",
+  "For exams, small time savings matter. Focus on correctness and then speed.",
+  "Keep your posture steady, shoulders relaxed, and wrists soft while typing.",
+  "When you trust your fingers and look at the screen, progress becomes fast and steady."
+];
+
+/* ---------- STATE ---------- */
+let state = {
+  running:false, strict:false, mode:"words", difficulty:"med",
+  lessonIndex:0, lessonsTotal:10,
+  text:"", index:0, correct:0, total:0, startTs:null, timer:null,
+  history:[], mistakes:{}
+};
+
+/* ---------- DOM ---------- */
+const targetArea = document.getElementById("targetArea");
+const hiddenInput = document.createElement("input");
+hiddenInput.autocomplete="off";hiddenInput.autocorrect="off";hiddenInput.autocapitalize="off";hiddenInput.spellcheck=false;
+hiddenInput.style.opacity = 0; hiddenInput.style.position = "absolute"; hiddenInput.style.left = "-9999px"; document.body.appendChild(hiddenInput);
+
+const startBtn = document.getElementById("start");
+const pauseBtn = document.getElementById("pause");
+const modeSel = document.getElementById("mode");
+const diffSel = document.getElementById("difficulty");
+const strictChk = document.getElementById("strict");
+const autoAdvanceChk = document.getElementById("autoAdvance");
+const runnerStyleSel = document.getElementById("runnerStyle");
+const customText = document.getElementById("customText");
+const keyboardWrap = document.getElementById("keyboard");
+
+const wpmEl = document.getElementById("wpm");
+const accEl = document.getElementById("acc");
+const wpmBar = document.getElementById("wpmBar");
+const accBar = document.getElementById("accBar");
+const timerEl = document.getElementById("timer");
+const wpmBig = document.getElementById("wpmBig");
+const accBig = document.getElementById("accBig");
+const lessonBar = document.getElementById("lessonBar");
+const lessonWrap = document.getElementById("lessonWrap");
+const lessonText = document.getElementById("lessonText");
+const last60Line = document.getElementById("last60Line");
+const coachLine = document.getElementById("coachLine");
+const historyEl = document.getElementById("history");
+const summaryLine = document.getElementById("summaryLine");
+const exportCSVBtn = document.getElementById("exportCSV");
+const downloadCertBtn = document.getElementById("downloadCert");
+const clearHistoryBtn = document.getElementById("clearHistory");
+const themeBtn = document.getElementById("themeBtn");
+const openTutorBtn = document.getElementById("openTutor");
+const privacyLink = document.getElementById("privacyLink");
+const runnerMain = document.getElementById("runnerMain");
+const trackRail = document.getElementById("trackRail");
+const dailyGoalEl = document.getElementById("dailyGoal");
+const certCanvas = document.getElementById("certCanvas");
+const progressCanvas = document.getElementById("progressGraph");
+const showMoreBtn = document.getElementById("showMoreBtn");
+
+/* ---------- keyboard fingerMap ---------- */
+const fingerMap = {
+  "`":"left-pinky","1":"left-pinky","2":"left-ring","3":"left-middle","4":"left-index","5":"left-index",
+  "q":"left-pinky","w":"left-ring","e":"left-middle","r":"left-index","t":"left-index",
+  "a":"left-pinky","s":"left-ring","d":"left-middle","f":"left-index","g":"left-index",
+  "z":"left-pinky","x":"left-ring","c":"left-middle","v":"left-index","b":"left-index",
+  "6":"right-index","7":"right-index","8":"right-middle","9":"right-ring","0":"right-pinky",
+  "-":"right-pinky","=":"right-pinky",
+  "y":"right-index","u":"right-index","i":"right-middle","o":"right-ring","p":"right-pinky",
+  "[":"right-pinky","]":"right-pinky","\\":"right-pinky",
+  "h":"right-index","j":"right-index","k":"right-middle","l":"right-ring",";":"right-pinky","'":"right-pinky",
+  "Enter":"right-pinky","n":"right-index","m":"right-middle",",":"right-ring",".":"right-ring","/":"right-pinky",
+  " ":"thumb","Tab":"left-pinky","Caps":"left-pinky","Shift":"left-pinky","Backspace":"right-pinky"
+};
+/* ---------- keyboard layout + build ---------- */
+const rows = [
+  ["`","1","2","3","4","5","6","7","8","9","0","-","=","Back"],
+  ["Tab","q","w","e","r","t","y","u","i","o","p","[","]","\\"],
+  ["Caps","a","s","d","f","g","h","j","k","l",";","'","Enter"],
+  ["Shift","z","x","c","v","b","n","m",",",".","/","Shift"],
+  ["Space"]
+];
+
+function buildKeyboard(){
+  keyboardWrap.innerHTML = "";
+  rows.forEach(rowKeys=>{
+    const rowEl = document.createElement("div"); rowEl.className = "row";
+    rowKeys.forEach(k=>{
+      const keyEl = document.createElement("div"); keyEl.className = "key";
+      if(k.length>1 && k!=="Space") keyEl.classList.add("small");
+      if(k==="Space") keyEl.classList.add("space");
+      keyEl.textContent = (k==="Space" ? "⎵" : k);
+      let dk = k;
+      if(k==="Space") dk=" ";
+      if(k==="Back") dk="Backspace";
+      if(k==="Enter") dk="\n";
+      keyEl.dataset.key = dk===" " ? " " : (dk.length===1 ? dk.toLowerCase() : dk);
+      // finger zone class & tooltip
+      const mapKey = (k==="Space") ? " " : (k.length===1 ? k.toLowerCase() : (k==="Back"?"Backspace":k));
+      const finger = fingerMap[mapKey];
+      if(finger && finger !== "thumb"){
+        keyEl.classList.add("zone-" + finger);
+        keyEl.title = finger.replace("-"," ").toUpperCase();
+      }
+      rowEl.appendChild(keyEl);
+    });
+    keyboardWrap.appendChild(rowEl);
+  });
+}
+
+/* helper find key */
+function findKeyEl(ch){
+  const els = Array.from(document.querySelectorAll(".key"));
+  return els.find(e => e.dataset.key === ch || e.dataset.key === (ch||"").toLowerCase());
+}
+function clearKeyHighlights(){document.querySelectorAll(".key").forEach(k=>k.classList.remove("next","correct","wrong","pressed"))}
+function markKey(ch, cls){
+  const el = findKeyEl(ch); if(!el) return; el.classList.remove("next","correct","wrong"); el.classList.add(cls);
+  setTimeout(()=>{ if(el) el.classList.remove(cls); updateNextKeyHighlight(); }, cls==="wrong"?360:180);
+}
+
+/* ---------- lesson generation ---------- */
+function sampleWords(count,diff){ const pool = wordPools[diff] || wordPools.med; const out=[]; for(let i=0;i<count;i++) out.push(pool[Math.floor(Math.random()*pool.length)]); return out.join(" "); }
+function makeLesson(){
+  state.mode = modeSel.value;
+  if(state.mode === "custom"){ const t = (customText.value || "").trim(); state.text = t || "Type custom text."; }
+  else if(state.mode === "sentences"){ const words = sampleWords(6 + Math.floor(Math.random()*6), state.difficulty); state.text = words.charAt(0).toUpperCase() + words.slice(1) + "."; }
+  else if(state.mode === "numbers"){ const out=[]; for(let i=0;i<20;i++){ let len=2+Math.floor(Math.random()*3); let num=""; for(let j=0;j<len;j++) num+=Math.floor(Math.random()*10); out.push(num);} state.text = out.join(" "); }
+  else if(state.mode === "symbols"){ const chars=[",",".",";","?",":","!","-","'","\"","/"]; const out=[]; for(let i=0;i<40;i++) out.push(chars[Math.floor(Math.random()*chars.length)]); state.text = out.join(" "); }
+  else if(state.mode === "real"){ state.text = realParagraphs[Math.floor(Math.random()*realParagraphs.length)]; }
+  else { const count = 6 + Math.floor(Math.random()*6); state.text = sampleWords(count, state.difficulty); }
+
+  state.index = 0; state.mistakes = {}; renderTarget(); updateLessonProgress(); updateNextKeyHighlight(); updateRunnerPosition();
+}
+
+/* ---------- render target ---------- */
+function renderTarget(){
+  const t = state.text || "";
+  targetArea.innerHTML = "";
+  for(let i=0;i<t.length;i++){
+    const span = document.createElement("span");
+    span.className = "char " + (i < state.index ? "correct" : (i === state.index ? "current" : ""));
+    span.textContent = t[i];
+    targetArea.appendChild(span);
+  }
+}
+
+/* ---------- next key highlight ---------- */
+function updateNextKeyHighlight(){
+  clearKeyHighlights();
+  const next = state.text[state.index] || "";
+  if(!next) return;
+  const keyEl = findKeyEl(next) || findKeyEl(next.toLowerCase());
+  if(keyEl) keyEl.classList.add("next");
+}
+
+/* ---------- runner styles ---------- */
+function setRunnerStyle(style){
+  let html = "";
+
+  if(style === "snake"){
+    html = `<svg width="48" height="24" viewBox="0 0 48 24"
+      xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 12 C10 6, 18 6, 24 12 S38 18, 44 12"
+        fill="none" stroke="#0ea5a4" stroke-width="3"
+        stroke-linecap="round"/>
+      <circle cx="44" cy="12" r="2" fill="#f59e0b"/>
+    </svg>`;
+  }
+
+  else if(style === "ball"){
+    html = `<div style="
+      width:18px;height:18px;
+      background:#0ea5a4;
+      border-radius:50%;
+    "></div>`;
+  }
+
+  else { /* HUMAN — CSS BASED */
+    html = `
+    <div style="
+      position:relative;
+      width:18px;height:28px;
+    ">
+      <div style="
+        width:8px;height:8px;
+        background:#0ea5a4;
+        border-radius:50%;
+        margin:auto;
+      "></div>
+
+      <div style="
+        width:4px;height:12px;
+        background:#0ea5a4;
+        margin:2px auto;
+        border-radius:2px;
+      "></div>
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        width:16px;
+        margin:auto;
+      ">
+        <div style="width:4px;height:8px;background:#0ea5a4"></div>
+        <div style="width:4px;height:8px;background:#0ea5a4"></div>
+      </div>
+    </div>`;
+  }
+
+  runnerMain.innerHTML = html;
+}
+ 
+/* ---------- runner movement ---------- */
+function updateRunnerPosition(){
+  const total = Math.max(1, state.text.length || 1);
+  const p = Math.min(1, Math.max(0, state.index / total));
+  const railWidth = trackRail.clientWidth || 1;
+  const leftPx = Math.round(8 + p * (railWidth - 40));
+  runnerMain.style.left = leftPx + "px";
+}
+function bumpRunner(isCorrect){
+  let s = parseFloat(runnerMain.dataset.scale || "1");
+  s += isCorrect ? 0.06 : -0.07; s = Math.max(0.7, Math.min(1.35, s));
+  runnerMain.dataset.scale = s.toFixed(2);
+  runnerMain.style.transform = `translate(-50%,-50%) scale(${s})`;
+  runnerMain.style.boxShadow = isCorrect ? "0 10px 24px rgba(34,197,94,0.14)" : "0 8px 18px rgba(239,68,68,0.12)";
+}
+
+/* ---------- typing handling ---------- */
+let keystrokeLog = [];
+hiddenInput.addEventListener("input", e=>{
+  if(!state.running) return;
+  const val = hiddenInput.value; if(!val) return;
+  for(let i=0;i<val.length;i++) handleKey(val[i]);
+  hiddenInput.value = "";
+});
+
+/* single keydown listener — handles visual key press + Backspace logic */
+document.addEventListener("keydown", e=>{
+  if(state.running) hiddenInput.focus({ preventScroll: true });
+
+  const el = findKeyEl(e.key) || findKeyEl((e.key||"").toLowerCase());
+  if(el){ el.classList.add("pressed"); setTimeout(()=>el.classList.remove("pressed"),80); }
+  // handle Backspace (allow correction when running and not strict)
+  if(e.key === "Backspace" && state.running){
+    e.preventDefault();
+    if(state.index>0){
+      // step back one char and treat it as 'undo' (do not log to keystroke)
+      state.index = Math.max(0, state.index - 1);
+      // update spans
+      const spans = targetArea.children;
+      if(spans[state.index]) {
+        spans[state.index].classList.remove("correct","wrong","current");
+        spans[state.index].classList.add("current");
+      }
+      // make prior char non-current if exists
+      if(spans[state.index+1]) spans[state.index+1].classList.remove("current");
+      updateNextKeyHighlight();
+      updateRunnerPosition();
+      updateStats();
+    }
+  }
+});
+
+/* handle incoming char from input (incl Enter -> \n) */
+function handleKey(ch){
+  const now = Date.now();
+  keystrokeLog.push({ ts: now, correct: false });
+  while(keystrokeLog.length && keystrokeLog[0].ts < now - 70000) keystrokeLog.shift();
+  const expected = state.text[state.index] || "";
+  const norm = (ch === "\r" ? "\n" : ch);
+  state.total = (state.total||0) + 1;
+
+  if(norm === expected){
+    if(keystrokeLog.length) keystrokeLog[keystrokeLog.length-1].correct = true;
+    state.correct = (state.correct||0) + 1;
+    const spans = targetArea.children;
+    if(spans[state.index]){ spans[state.index].classList.remove("current"); spans[state.index].classList.add("correct"); }
+    state.index++;
+    markKey(expected,"correct");
+    bumpRunner(true);
+    updateRunnerPosition();
+    updateNextKeyHighlight();
+    if(state.index >= state.text.length){ finishLesson(); return; }
+  } else {
+    const spans = targetArea.children;
+    if(spans[state.index]){ spans[state.index].classList.add("wrong"); setTimeout(()=>spans[state.index]?.classList.remove("wrong"),360); }
+    if(expected) state.mistakes[expected] = (state.mistakes[expected]||0)+1;
+    markKey(norm,"wrong");
+    bumpRunner(false);
+    if(!state.strict){
+      state.index++;
+      updateRunnerPosition();
+      updateNextKeyHighlight();
+      if(state.index >= state.text.length){ finishLesson(); return; }
+    } else {
+      // strict mode: don't advance, give stronger visual
+      if(spans[state.index]) spans[state.index].classList.add("current");
+    }
+  }
+  updateStats();
+}
+
+/* ---------- stats ---------- */
+function updateStats(){
+  const elapsed = state.startTs ? (Date.now()-state.startTs)/1000 : 0;
+  const wpm = elapsed>0 ? Math.round((state.correct/5)/(elapsed/60)) : 0;
+  const acc = state.total>0 ? Math.round((state.correct/state.total)*100) : 100;
+  if(wpmEl) wpmEl.textContent = wpm;
+  if(accEl) accEl.textContent = acc + "%";
+  if(wpmBar) wpmBar.style.width = Math.min(200,wpm)/200*100 + "%";
+  if(accBar) accBar.style.width = acc + "%";
+  if(wpmBig) wpmBig.textContent = wpm;
+  if(accBig) accBig.textContent = acc + "%";
+
+  const totalSec = Math.floor(elapsed); const mins = Math.floor(totalSec/60); const secs = totalSec%60;
+  if(timerEl) timerEl.textContent = mins.toString().padStart(2,"0") + ":" + secs.toString().padStart(2,"0");
+
+  updateDailyGoal(true); updateLast60();
+  if(acc >= 95) runnerMain.style.border = "2px solid " + (document.body.classList.contains('dark') ? "#ffdca3" : "gold");
+  else runnerMain.style.border = "0";
+  // toggle export buttons if history present
+  exportCSVBtn.disabled = state.history.length === 0;
+  downloadCertBtn.disabled = state.history.length === 0;
+}
+
+/* ---------- last60 window ---------- */
+function updateLast60(){
+  const now = Date.now(); const windowMs = 60000;
+  while(keystrokeLog.length && keystrokeLog[0].ts < now - 70000) keystrokeLog.shift();
+  const windowEntries = keystrokeLog.filter(e => e.ts >= now - windowMs);
+  if(windowEntries.length === 0){ last60Line.textContent = "Last 60s: — WPM • —% Accuracy"; return; }
+  const correctCount = windowEntries.reduce((s,e)=>s + (e.correct?1:0),0); const totalCount = windowEntries.length;
+  const wpm = Math.round((correctCount/5)); const acc = Math.round((correctCount/totalCount)*100);
+  last60Line.textContent = `Last 60s: ${wpm} WPM • ${acc}% Accuracy`;
+}
+
+/* ---------- finish lesson ---------- */
+function finishLesson(){
+  const duration = Math.max(1, Math.floor((Date.now()-state.startTs)/1000));
+  const wpm = Math.round((state.correct/5) / (duration/60));
+  const accuracy = state.total>0 ? Math.round((state.correct/state.total)*100) : 0;
+  const rec = { ts: Date.now(), wpm, accuracy, duration, lesson: state.lessonIndex+1, difficulty: state.difficulty };
+  state.history.unshift(rec); if(state.history.length>500) state.history.pop(); saveHistory(); renderHistory();
+  updateCoachAndMistakes(wpm,accuracy);
+  state.running = false; clearInterval(state.timer); state.index = state.text.length; updateRunnerPosition(); updateStats();
+  if(accuracy >= 95) spawnConfetti();
+  // auto-advance
+  if(autoAdvanceChk && autoAdvanceChk.checked){
+    startAutoAdvanceCountdown(3);
+  } else {
+    if(coachLine) coachLine.textContent = "Lesson complete — press Start for next.";
+  }
+}
+
+/* ---------- confetti ---------- */
+const confettiCanvas = document.createElement("canvas");
+confettiCanvas.id = "confettiCanvas";
+confettiCanvas.style.position="fixed";
+confettiCanvas.style.left="0";
+confettiCanvas.style.top="0";
+confettiCanvas.style.pointerEvents="none";
+confettiCanvas.style.zIndex="999";
+confettiCanvas.style.display="none";
+document.body.appendChild(confettiCanvas);
+const confetti = { ctx: confettiCanvas.getContext ? confettiCanvas.getContext('2d') : null, particles: [] };
+function resizeConfetti(){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; if(confetti.ctx) confetti.ctx.scale(1,1); }
+function spawnConfetti(){
+  if(!confetti.ctx) return;
+  confettiCanvas.style.display = "block";
+  confetti.particles = [];
+  const num = 40;
+  for(let i=0;i<num;i++){
+    confetti.particles.push({
+      x: window.innerWidth * 0.5 + (Math.random()*200-100),
+      y: window.innerHeight * 0.35 + (Math.random()*60-30),
+      vx: (Math.random()*6-3), vy: (Math.random()*-6-2), r: Math.random()*6+3,
+      color: ['#f59e0b','#0ea5a4','#06b6d4','#ef4444'][Math.floor(Math.random()*4)], life: Math.random()*60+40
+    });
+  }
+  requestAnimationFrame(stepConfetti);
+}
+function stepConfetti(){
+  if(!confetti.ctx) return;
+  const ctx = confetti.ctx; ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  confetti.particles.forEach(p=>{ p.vy += 0.12; p.x += p.vx; p.y += p.vy; p.life--; ctx.fillStyle = p.color; ctx.beginPath(); ctx.ellipse(p.x,p.y,p.r,p.r/1.3,0,0,Math.PI*2); ctx.fill(); });
+  confetti.particles = confetti.particles.filter(p=>p.life>0 && p.y < confettiCanvas.height+50);
+  if(confetti.particles.length) requestAnimationFrame(stepConfetti); else { confettiCanvas.style.display = "none"; }
+}
+window.addEventListener("resize", ()=>{ resizeConfetti(); updateRunnerPosition(); drawProgressGraph(); });
+resizeConfetti();
+
+/* ---------- storage & history ---------- */
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }catch(e){ return []; } }
+function saveHistory(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.history)); }catch(e){} }
+function clearHistory(){
+  if(!state.history.length){ alert("No history to clear."); return; }
+  if(confirm("Clear saved session history?")){
+    state.history=[]; saveHistory(); renderHistory(); updateDailyGoal(false); alert("History cleared.");
+  }
+}
+
+/* render history compact (HISTORY_SHOWN) and showMore toggle */
+let historyExpanded = false;
+function renderHistory(){
+  historyEl.innerHTML = "";
+  if(!state.history.length){ historyEl.textContent = "No sessions yet"; drawProgressGraph(); updateStats(); return; }
+
+  const show = historyExpanded ? state.history.length : Math.min(HISTORY_SHOWN, state.history.length);
+  for(let i=0;i<show;i++){
+    const s = state.history[i];
+    const d = new Date(s.ts);
+    const el = document.createElement("div");
+    el.className = "small"; el.style.marginBottom = "8px";
+    el.innerHTML = `<strong>${s.wpm} WPM</strong> • ${s.accuracy}% • ${s.duration}s<div class="small" style="color:var(--muted);font-size:11px">${d.toLocaleString()}</div>`;
+    historyEl.appendChild(el);
+  }
+
+  if(state.history.length > HISTORY_SHOWN){
+    showMoreBtn.style.display = "inline-block";
+    showMoreBtn.textContent = historyExpanded ? "Show less" : `Show ${state.history.length - HISTORY_SHOWN} more`;
+  } else {
+    showMoreBtn.style.display = "none";
+  }
+
+  let best=0,sum=0; state.history.forEach(s=>{ if(s.wpm>best) best=s.wpm; sum+=s.wpm; });
+  summaryLine.textContent = `Best: ${best} WPM • Avg: ${state.history.length?Math.round(sum/state.history.length):0} WPM`;
+
+  if(state.history.length >= 30){
+    if(lessonWrap) lessonWrap.style.display = "none";
+  } else {
+    if(lessonWrap) lessonWrap.style.display = "block";
+  }
+
+  drawProgressGraph();
+}
+
+/* ---------- progress graph ---------- */
+function drawProgressGraph(){
+  if(!progressCanvas) return;
+  const ctx = progressCanvas.getContext("2d");
+  const w = progressCanvas.clientWidth || progressCanvas.width;
+  const h = progressCanvas.clientHeight || progressCanvas.height;
+  progressCanvas.width = w * devicePixelRatio;
+  progressCanvas.height = h * devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = document.body.classList.contains('dark') ? "#042331" : "#ffffff";
+  ctx.fillRect(0,0,w,h);
+
+  const points = state.history.slice(0,GRAPH_MAX_POINTS).map(s=>s.wpm).reverse();
+  if(points.length === 0){
+    ctx.fillStyle = document.body.classList.contains('dark') ? "#9fb0c8" : "#64748b";
+    ctx.font = "12px system-ui";
+    ctx.fillText("No sessions yet", 10, 18);
+    return;
+  }
+
+  const maxVal = Math.max(...points, 20);
+  const minVal = Math.min(...points, 0);
+  const left = 10, right = w - 10, top = 8, bottom = h - 14;
+  const stepX = (right - left) / Math.max(1, points.length - 1);
+
+  ctx.strokeStyle = "rgba(0,0,0,0.06)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(left, top + (bottom-top)/2);
+  ctx.lineTo(right, top + (bottom-top)/2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  points.forEach((v,i)=>{
+    const x = left + i * stepX;
+    const y = bottom - ((v - minVal) / (maxVal - minVal || 1)) * (bottom - top);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  const grad = ctx.createLinearGradient(0,0,w,0);
+  grad.addColorStop(0, "#0ea5a4");
+  grad.addColorStop(1, "#f59e0b");
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 2.4;
+  ctx.stroke();
+
+  points.forEach((v,i)=>{
+    const x = left + i * stepX;
+    const y = bottom - ((v - minVal) / (maxVal - minVal || 1)) * (bottom - top);
+    ctx.beginPath();
+    ctx.fillStyle = "#07203a";
+    ctx.arc(x,y,2.2,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  ctx.font = "11px system-ui";
+  ctx.fillStyle = document.body.classList.contains('dark') ? "#9fb0c8" : "#64748b";
+  ctx.fillText(maxVal + " WPM", left, top + 10);
+  ctx.fillText(minVal + " WPM", left, bottom + 12);
+}
+
+/* ---------- certificate (simple) ---------- */
+function generateCertificate(session){
+  const canvas = certCanvas; const ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="#07203a"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  const g = ctx.createLinearGradient(0,0,canvas.width,0); g.addColorStop(0,"#0ea5a4"); g.addColorStop(1,"#f59e0b");
+  ctx.fillStyle = g; ctx.fillRect(40,40,canvas.width-80,120); ctx.fillStyle="#fff"; ctx.font="22px system-ui"; ctx.fillText("Veyra — Typing Progress",70,100);
+  ctx.font="14px system-ui"; ctx.fillStyle="#dbeafe"; ctx.fillText("Awarded on: "+new Date(session.ts).toLocaleString(),70,130);
+  ctx.fillStyle="#fff"; ctx.font="36px system-ui"; ctx.fillText(session.wpm+" WPM",70,220);
+  canvas.toBlob(function(blob){
+    const url = URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download = CERT_PREFIX+session.ts+".png"; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+  },"image/png");
+}
+
+/* ---------- auto-advance countdown ---------- */
+let countdownTimer = null;
+let countdownOverlay = null;
+function ensureCountdownOverlay(){
+  if(countdownOverlay) return;
+  countdownOverlay = document.createElement("div");
+  countdownOverlay.style.position = "fixed";
+  countdownOverlay.style.left = "50%";
+  countdownOverlay.style.top = "20%";
+  countdownOverlay.style.transform = "translateX(-50%)";
+  countdownOverlay.style.background = "rgba(7,20,32,0.9)";
+  countdownOverlay.style.color = "#fff";
+  countdownOverlay.style.padding = "12px 18px";
+  countdownOverlay.style.borderRadius = "10px";
+  countdownOverlay.style.fontSize = "22px";
+  countdownOverlay.style.zIndex = 9999;
+  countdownOverlay.style.display = "none";
+  countdownOverlay.style.textAlign = "center";
+  document.body.appendChild(countdownOverlay);
+}
+function startAutoAdvanceCountdown(seconds=3){
+  if(!autoAdvanceChk || !autoAdvanceChk.checked) return;
+  ensureCountdownOverlay();
+  let n = seconds;
+  countdownOverlay.textContent = `Next lesson in ${n}...`;
+  countdownOverlay.style.display = "block";
+  if(countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(()=>{
+    n--;
+    if(n>0){
+      countdownOverlay.textContent = `Next lesson in ${n}...`;
+    }else{
+      clearInterval(countdownTimer); countdownTimer=null;
+      countdownOverlay.style.display = "none";
+      if(!state.running){ startPractice(); }
+    }
+  },1000);
+}
+function cancelAutoAdvanceCountdown(){
+  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
+  if(countdownOverlay) countdownOverlay.style.display = "none";
+}
+
+/* ---------- coach ---------- */
+function updateCoachAndMistakes(wpm,accuracy){
+  if(accuracy >= 95 && wpm >= 35) coachLine.textContent = "Excellent — keep that accuracy!";
+  else if(accuracy < 80) coachLine.textContent = "Slow down; focus on accuracy.";
+  else coachLine.textContent = "Good — steady progress.";
+}
+
+/* ---------- daily goal ---------- */
+function updateDailyGoal(includeCurrent){
+  const today = new Date().toDateString(); let total=0;
+  (state.history||[]).forEach(s=>{ if(new Date(s.ts).toDateString()===today) total+=s.duration||0; });
+  if(includeCurrent && state.running && state.startTs) total += Math.floor((Date.now()-state.startTs)/1000);
+  const mm = Math.floor(total/60).toString().padStart(2,"0"), ss=(total%60).toString().padStart(2,"0");
+  dailyGoalEl.textContent = `${mm}:${ss} / 10:00`;
+}
+
+/* ---------- controls ---------- */
+function startPractice(){
+  cancelAutoAdvanceCountdown();
+  if(state.running) return;
+  state.strict = strictChk.checked; state.mode = modeSel.value; state.difficulty = diffSel.value;
+  // guard: if custom and empty, prevent start
+  if(state.mode === "custom" && !(customText.value || "").trim()){
+    alert("Custom text is empty — paste some text into the custom box or choose another mode.");
+    return;
+  }
+  state.running = true; state.correct=0; state.total=0; state.mistakes={}; state.startTs = Date.now();
+  startBtn.disabled = true; pauseBtn.disabled = false; startBtn.setAttribute('aria-pressed','true'); pauseBtn.setAttribute('aria-pressed','false');
+  makeLesson(); hiddenInput.focus(); state.timer = setInterval(updateStats,800);
+}
+function pausePractice(){
+  if(!state.running) return;
+  state.running=false; clearInterval(state.timer); hiddenInput.blur(); cancelAutoAdvanceCountdown();
+  startBtn.disabled = false; pauseBtn.disabled = true; startBtn.setAttribute('aria-pressed','false'); pauseBtn.setAttribute('aria-pressed','true');
+}
+
+/* ---------- bindings ---------- */
+startBtn.addEventListener("click", startPractice);
+pauseBtn.addEventListener("click", pausePractice);
+exportCSVBtn.addEventListener("click", ()=>{
+  if(!state.history.length){ alert("No history."); return; }
+  const csv = "ts,wpm,acc,dur\n"+state.history.map(s=>`${s.ts},${s.wpm},${s.accuracy},${s.duration}`).join("\n");
+  const blob=new Blob([csv],{type:"text/csv"}); const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download=`Veyra_history_${Date.now()}.csv`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+});
+downloadCertBtn.addEventListener("click", ()=>{
+  if(!state.history.length){ alert("No sessions yet."); return; }
+  generateCertificate(state.history[0]);
+});
+clearHistoryBtn.addEventListener("click", clearHistory);
+openTutorBtn.addEventListener("click", ()=>{
+  alert("Tips:\n• Keep fingers on home row.\n• Look at screen, not keyboard.\n• Aim accuracy > 90%.\n• Short, regular practice works best.");
+});
+privacyLink.addEventListener("click", e=>{ e.preventDefault(); alert("Privacy: progress stored only locally (this device). No account, no tracking."); });
+
+document.addEventListener("click", ()=>{ if(state.running) hiddenInput.focus(); });
+
+/* theme toggle */
+themeBtn.addEventListener("click", ()=>{
+  document.body.classList.toggle("dark");
+  themeBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+  themeBtn.setAttribute('aria-pressed', document.body.classList.contains('dark') ? 'true' : 'false');
+  drawProgressGraph();
+});
+
+/* runner style change */
+runnerStyleSel.addEventListener("change", ()=>{
+  const style = runnerStyleSel.value;
+  setRunnerStyle(style);
+});
+
+/* show more toggle */
+showMoreBtn.addEventListener("click", ()=>{
+  historyExpanded = !historyExpanded;
+  renderHistory();
+});
+
+/* ---------- init ---------- */
+function init(){
+  state.history = loadHistory();
+  buildKeyboard();
+  renderHistory();
+  setRunnerStyle(runnerStyleSel.value || "human");
+  if(!state.text || !state.text.length){ state.text = sampleWords(10,"med"); renderTarget(); updateNextKeyHighlight(); }
+  updateRunnerPosition();
+  updateStats();
+  updateDailyGoal(false);
+  exportCSVBtn.disabled = state.history.length === 0;
+  downloadCertBtn.disabled = state.history.length === 0;
+}
+init();
+
+/* ensure runner position updates on resize */
+window.addEventListener("resize", ()=>{ updateRunnerPosition(); resizeConfetti(); drawProgressGraph(); });
+
+// 🔔 LIVE DATE + TIME (Indian format)
+function startLiveDateTime(){
+  const el = document.getElementById("liveDateTime");
+  if(!el) return;
+
+  function update(){
+    const now = new Date();
+
+    // DATE
+    const day   = now.getDate().toString().padStart(2,"0");
+    const month = (now.getMonth() + 1).toString().padStart(2,"0");
+    const year  = now.getFullYear();
+
+    // TIME (12-hour format)
+    let hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2,"0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 = 12
+    hours = hours.toString().padStart(2,"0");
+   el.textContent = `${day}-${month}-${year} | ${hours}:${minutes} ${ampm}`;
+  }
+  update();
+  setInterval(update, 1000);
+}
+// START CLOCK
+startLiveDateTime();
+
+const btn = document.getElementById("toggleKeyboardBtn");
+const kb  = document.getElementById("keyboard");
+
+if (btn && kb) {
+  btn.onclick = () => {
+    kb.classList.toggle("show");
+
+    const isShown = kb.classList.contains("show");
+    btn.textContent = isShown
+      ? "⌨ Hide Keyboard"
+      : "⌨ Show Keyboard";
+  };
+}
+
+</script>
+</body>
+</html>
