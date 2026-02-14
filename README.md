@@ -1,3 +1,7 @@
+
+## 🌐 Live Demo
+Try Veyra here: https://bhagyashri1124.github.io/Veyra/
+
 # Veyra
 
 Veyra is a modern Touch Typing Practice Web App for learners designed to help users improve typing speed, accuracy, and muscle memory through interactive practice.
