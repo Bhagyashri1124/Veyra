@@ -15,6 +15,25 @@ Veyra is my first web application project focused on creating a clean and beginn
 - Clean and modern interface
 - Beginner-friendly touch typing practice system
 
+- ## 📸 Preview
+
+### 🖥️ Main Interface
+<p align="center">
+  <img src="screenshot-main.png" width="70%">
+</p>
+
+### ⚙️ Modes & Levels
+<p align="center">
+  <img src="screenshot-modes.png" width="45%">
+  <img src="screenshot-level.png" width="45%">
+</p>
+
+### 🎮 Interactive Modes & Stats
+<p align="center">
+  <img src="screenshot-theme.png" width="45%">
+  <img src="screenshot-stats.png" width="45%">
+</p>
+
 ## Tech Stack
 - Python (Flask)
 - HTML
