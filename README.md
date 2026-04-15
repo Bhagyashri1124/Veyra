@@ -15,7 +15,7 @@ Veyra is my first web application project focused on creating a clean and beginn
 - Clean and modern interface
 - Beginner-friendly touch typing practice system
 
-- ## 📸 Preview
+## 📸 Preview
 
 ### 🖥️ Main Interface
 <p align="center">
