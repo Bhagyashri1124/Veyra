@@ -35,14 +35,11 @@ Veyra is my first web application project focused on creating a clean and beginn
 </p>
 
 ## Tech Stack
-- Python (Flask)
 - HTML
 - CSS
 - JavaScript
 
-## Project Note
-This project is proprietary.  
-Source code is NOT open source.  
-Commercial use and redistribution are prohibited.
+## 📄 License
+This project is licensed under the MIT License.
 
 ©2025 Bhagyashri
